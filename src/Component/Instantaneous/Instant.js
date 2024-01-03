@@ -143,6 +143,8 @@ function Instant() {
       tag35: props.tag35,
     });
   };
+  const [division, setDivision] = useState("");
+  const [station, setStation] = useState("");
 
   const stationsByDivision = {
     ZONE1: ["ZONE1_TW_IN_BLOCK", "ZONE1_DEEP_PUBLIC_SCHOOL"],
@@ -154,14 +156,11 @@ function Instant() {
     setDivision(event.target.value);
     setStation("");
   };
-
-  const [Base_Url, setBase_Url] = useState("");
+  // const Base_Url = "http://59.99.154.95:5984/";
+  const [Base_Url, setBase_Url] = useState(process.env.REACT_APP_BASE_URL);
   useCheckWorkingURL().then((promiseResult) => {
     setBase_Url(promiseResult);
   });
-
-  const [division, setDivision] = useState("");
-  const [station, setStation] = useState("");
   const divisionOptions = ["ZONE1", "ZONE2", "ZONE3"];
   const stationOptions = division ? stationsByDivision[division] : [];
   const ZONE1_S1 = useAPi(Base_Url + "tpzone1/101");
@@ -195,6 +194,7 @@ function Instant() {
         console.log("ZONE1_TW_IN_BLOCK");
         ZONE1_S1.getReq();
         DisplayData1(ZONE1_S1.APIdata);
+
         Set_Pump(1);
         break;
 
@@ -204,16 +204,18 @@ function Instant() {
         console.log("ZONE1_DEEP_PUBLIC_SCHOOL");
         DisplayData1(ZONE1_S2.APIdata);
         Set_Pump(2);
+
+        break;
+
+      case division === "ZONE2" && station === "ZONE2_MOKSHDHAM":
+        ZONE2_S2.getReq();
+        DisplayData1(ZONE2_S1.APIdata);
+        Set_Pump(4);
         break;
       case division === "ZONE2" && station === "ZONE2_NHAI_ROAD":
         ZONE2_S1.getReq();
-        DisplayData1(ZONE2_S1.APIdata);
-        Set_Pump(3);
-        break;
-      case division === "ZONE2" && station === "ZONE2_MOKSHDHAM":
-        ZONE2_S2.getReq();
         DisplayData1(ZONE2_S2.APIdata);
-        Set_Pump(4);
+        Set_Pump(3);
         break;
       case division === "ZONE3" && station === "ZONE3_POLICE_STATION":
         ZONE3_S1.getReq();
@@ -425,6 +427,7 @@ function Instant() {
             onClose={() => setCreateModalOpen(false)}
           />
         </div>
+        <div></div>
         <FormModal
           open={PutModalOpen}
           onClose={() => SetPutModalOpen(false)}
@@ -482,14 +485,11 @@ const CreateNewAccountModal = ({ open, columns, onClose, cpump }) => {
 };
 
 function useAPi(url) {
-  if (url === "") {
-    url = "http://59.99.154.95:5984/";
-  }
   const [APIdata, setData] = useState({});
 
   useEffect(() => {
-    // getReq();
-  });
+    getReq();
+  }, []);
 
   const getReq = async () => {
     const response = await axios.get(url, {
@@ -534,8 +534,8 @@ function Update_Tw_Data(url, dbName, pump_id) {
       `${url}${dbName}/${pump_id}`,
       {
         auth: {
-          username: "Admin",
-          password: "War_ship_84",
+          username: process.env.REACT_APP_USERNAME,
+          password: process.env.REACT_APP_PASSWORD,
         },
       },
       data
